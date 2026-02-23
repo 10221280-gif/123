@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سندويجي</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+font-family:Tahoma;
+background:#0f0f0f;
+color:#ffd54f;
+text-align:center;
+}
+
+/* الهيدر */
+header{
+height:300px;
+background:url("WhatsApp Image 2026-02-21 at 5.39.11 PM.jpeg") center/cover no-repeat;
+}
+
+/* أزرار الأقسام */
+nav{
+margin:20px;
+display:flex;
+justify-content:center;
+gap:15px;
+}
+
+nav button{
+background:#ff9800;
+border:none;
+padding:14px 26px;
+border-radius:30px;
+font-weight:bold;
+cursor:pointer;
+}
+
+/* الترحيب */
+#welcome{
+padding:30px 20px;
+}
+
+#welcome img{
+width:80%;
+max-width:320px;
+border-radius:20px;
+box-shadow:0 0 25px rgba(255,152,0,.5);
+margin-bottom:20px;
+}
+
+#welcome p{
+font-size:26px;
+font-weight:bold;
+}
+
+/* المنيو */
+.menu{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:20px;
+padding:30px;
+}
+
+.hidden{display:none}
+
+.dish{
+background:#1a1a1a;
+border-radius:15px;
+overflow:hidden;
+box-shadow:0 0 15px rgba(255,152,0,.3);
+}
+
+.dish img{
+width:100%;
+height:160px;
+object-fit:cover;
+}
+
+.dish p{
+padding:10px;
+font-weight:bold;
+}
+
+.dish button{
+margin-bottom:15px;
+background:#25d366;
+border:none;
+color:white;
+padding:8px 18px;
+border-radius:20px;
+cursor:pointer;
+}
+
+/* سلة الطلب */
+#cart{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+background:#111;
+border-top:3px solid #ff9800;
+padding:15px;
+box-shadow:0 -5px 20px rgba(0,0,0,.6);
+}
+
+#cart ul{
+list-style:none;
+max-height:140px;
+overflow:auto;
+margin-bottom:10px;
+text-align:right;
+}
+
+.cart-item{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:8px;
+font-size:14px;
+}
+
+.cart-controls button{
+background:#ff9800;
+border:none;
+padding:2px 8px;
+margin:0 3px;
+border-radius:6px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.remove{
+background:#b71c1c!important;
+color:white;
+}
+
+/* زر واتساب */
+#cart button.send{
+background:#25d366;
+border:none;
+padding:12px 25px;
+color:white;
+font-weight:bold;
+border-radius:25px;
+cursor:pointer;
+margin-top:8px;
+}
+
+footer{
+margin-top:200px;
+padding:15px;
+background:#b71c1c;
+color:white;
+}
+</style>
+</head>
+
+<body>
+
+<header></header>
+
+<nav>
+<button onclick="showSection('sandwich')">السندويش</button>
+<button onclick="showSection('burger')">البرغر</button>
+</nav>
+
+<!-- الترحيب يبقى دائمًا -->
+<section id="welcome">
+<img src="WhatsApp Image 2026-02-21 at 5.43.39 PM.jpeg" alt="ترحيب">
+<p>نتميز بلقمتنا وطعمتنا بتحكي عنا</p>
+</section>
+
+<section id="sandwich" class="menu">
+<div class="dish">
+<img src="s1.jpg">
+<p>مقانق – 270000</p>
+<button onclick="addToCart('مقانق',270000)">أضف إلى السلة</button>
+</div>
+
+<div class="dish">
+<img src="s2.jpg">
+<p>سجق – 270000</p>
+<button onclick="addToCart('سجق',270000)">أضف إلى السلة</button>
+</div>
+</section>
+
+<section id="burger" class="menu hidden">
+<div class="dish">
+<img src="b1.jpg">
+<p>تشيز برغر – 360000</p>
+<button onclick="addToCart('تشيز برغر',360000)">أضف إلى السلة</button>
+</div>
+</section>
+
+<!-- سلة الطلب -->
+<div id="cart">
+<ul id="cartItems"></ul>
+<p>المجموع: <span id="total">0</span> ل.ل</p>
+<button class="send" onclick="sendWhatsApp()">إرسال الطلب عبر واتساب</button>
+</div>
+
+<footer>©️ سندويش الإبراهيم</footer>
+
+<script>
+var cart = [];
+var total = 0;
+
+/* إظهار الأقسام */
+function showSection(id){
+var sections = document.querySelectorAll(".menu");
+for(var i=0;i<sections.length;i++){
+sections[i].classList.add("hidden");
+}
+document.getElementById(id).classList.remove("hidden");
+}
+
+/* إضافة أو زيادة الكمية */
+function addToCart(name, price){
+for(var i=0;i<cart.length;i++){
+if(cart[i].name === name){
+cart[i].qty++;
+updateTotal();
+renderCart();
+return;
+}
+}
+cart.push({name:name, price:price, qty:1});
+updateTotal();
+renderCart();
+}
+
+/* حساب المجموع */
+function updateTotal(){
+total = 0;
+for(var i=0;i<cart.length;i++){
+total += cart[i].price * cart[i].qty;
+}
+}
+
+/* عرض السلة */
+function renderCart(){
+var ul = document.getElementById("cartItems");
+ul.innerHTML = "";
+
+for(var i=0;i<cart.length;i++){
+var li = document.createElement("li");
+li.className = "cart-item";
+
+li.innerHTML =
+cart[i].name +
+" (" + cart[i].price + ")" +
+'<div class="cart-controls">' +
+'<button onclick="changeQty('+i+',-1)">-</button>' +
+cart[i].qty +
+'<button onclick="changeQty('+i+',1)">+</button>' +
+'<button class="remove" onclick="removeItem('+i+')">✕</button>' +
+'</div>';
+
+ul.appendChild(li);
+}
+document.getElementById("total").textContent = total;
+}
+
+/* تغيير الكمية */
+function changeQty(index, change){
+cart[index].qty += change;
+if(cart[index].qty <= 0){
+cart.splice(index,1);
+}
+updateTotal();
+renderCart();
+}
+
+/* حذف الصنف */
+function removeItem(index){
+cart.splice(index,1);
+updateTotal();
+renderCart();
+}
+
+/* إرسال واتساب */
+function sendWhatsApp(){
+if(cart.length === 0){
+alert("السلة فارغة");
+return;
+}
+
+var message = "مرحبا، أود طلب:\n";
+for(var i=0;i<cart.length;i++){
+message += "- " + cart[i].name + " × " + cart[i].qty + "\n";
+}
+message += "المجموع: " + total + " ل.ل";
+
+var phone = "96170529239"; // غيّر الرقم
+var url = "https://wa.me/" + phone + "?text=" + encodeURIComponent(message);
+window.open(url,"_blank");
+}
+</script>
+
+</body>
+</html>
